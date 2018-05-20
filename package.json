@@ -1,0 +1,29 @@
+{
+  "name": "coin_news",
+  "version": "1.0.0",
+  "description": "A simple command line application to search for upcoming cryptocurrency events",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main.js",
+    "lint": "eslint ."
+  },
+  "author": {
+    "name": "Nishanth Vijayan",
+    "email": "nishanthvijayan1995@gmail.com"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "commander": "^2.15.1",
+    "tty-table": "^2.6.3"
+  },
+  "bin": {
+    "coin_news": "./main.js"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.12.0"
+  }
+}
