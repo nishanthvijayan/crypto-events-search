@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const CoinMarketCalendarClient = require('./coinmarketcal');
+const CoinMarketCalendarClient = require('./Coinmarketcal');
 const Table = require('tty-table')('automattic-cli-table');
 const program = require('commander');
 const { clientId, clientSecret } = require('./secrets.json').api;
@@ -49,7 +49,7 @@ async function getCoinList() {
       process.exit();
     } else {
       Cache.cacheCoinList(coinList);
-      cachedCoinList = coinList;
+      return coinList;
     }
   }
 
@@ -74,7 +74,7 @@ async function getCategoyList() {
       process.exit();
     } else {
       Cache.cacheCategoryList(categoryList);
-      cachedCategoryList = categoryList;
+      return categoryList
     }
   }
 
@@ -101,13 +101,15 @@ async function fetchData({ coinSymbols = [], categoryNames = [] }) {
   if (events && (Array.isArray(events) && events.length > 0)) {
     printEvents(events);
   } else {
-    console.log('No events for found for', coinSymbols);
+    console.log('No events found');
   }
 }
 
 
 async function printTypes() {
   const types = await getCategoyList();
+
+  console.log('Valid types are: ');
   console.log(types.map(type => type.name).join(', '));
 }
 
@@ -116,7 +118,6 @@ function main() {
   program
     .option('-c, --coins [symbols]', 'Comma separated list of coin symbols (Eg: btc,eth,req)')
     .option('-t, --types [types]', 'Comma separated list of event types to filter by (Eg: Roadmap,Airdrop)')
-    // .option('-l, --list', 'List all types of events')
     .parse(process.argv);
 
 
@@ -140,7 +141,6 @@ function main() {
     console.log('No coins or types specified\n');
     console.log('Use -c or --coins to specify coins Eg: --coins btc,omg,xmr');
     console.log('Use -t or --t to filter event by types Eg: --types roadmap,airdrop\n');
-    console.log('Valid types are: ');
     printTypes();
   }
 }
