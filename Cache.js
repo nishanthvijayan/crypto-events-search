@@ -23,4 +23,8 @@ module.exports = class Cache {
     const validTill = Date.now() + ttlInMs;
     return this.store.set(key, { validTill, data });
   }
+
+  delete(key) {
+    return this.store.delete(key);
+  }
 };

@@ -37,7 +37,13 @@ module.exports = class CoinMarketCalendarClient {
         this.cache.set('access_token', this.accessToken, authResponse.data.expires_in * 1000);
       }
     } catch (e) {
-      console.log(e);
+      if (e.response && e.response.status === 400) {
+        console.log('Something went wrong. Check if your client credentials are correct');
+      } else if (e.code === 'ENOTFOUND') {
+        console.log('Unable to connect to server. Check your internet connection');
+      } else {
+        console.log(e);
+      }
     }
   }
 
@@ -68,8 +74,15 @@ module.exports = class CoinMarketCalendarClient {
         return coins;
       }
     } catch (e) {
-      // TODO: Catch auth faiure and unset this.access_token
-      console.log(e);
+      if (e.response && e.response.status === 401) {
+        console.log('Authentication failed. Try again.');
+        this.accessToken = null;
+        this.cache.delete('access_token');
+      } else if (e.code === 'ENOTFOUND') {
+        console.log('Unable to connect to server. Check your internet connection');
+      } else {
+        console.log(e);
+      }
     }
 
     return null;
@@ -101,15 +114,24 @@ module.exports = class CoinMarketCalendarClient {
         return categories;
       }
     } catch (e) {
-      // TODO: Catch auth faiure and unset this.access_token
-      console.log(e);
+      if (e.response && e.response.status === 401) {
+        console.log('Authentication failed. Try again.');
+        this.accessToken = null;
+        this.cache.delete('access_token');
+      } else if (e.code === 'ENOTFOUND') {
+        console.log('Unable to connect to server. Check your internet connection');
+      } else {
+        console.log(e);
+      }
     }
 
     return null;
   }
 
 
-  async getEvents({ page = 1, max = 150, coins, categories }) {
+  async getEvents({
+    page = 1, max = 150, coins, categories,
+  }) {
     const eventsUrl = 'https://api.coinmarketcal.com/v1/events';
 
     if (this.accessToken == null) {
@@ -133,8 +155,15 @@ module.exports = class CoinMarketCalendarClient {
         return eventsResponse.data;
       }
     } catch (e) {
-      // TODO: Catch auth faiure and unset this.access_token
-      console.log(e);
+      if (e.response && e.response.status === 401) {
+        console.log('Authentication failed. Try again.');
+        this.accessToken = null;
+        this.cache.delete('access_token');
+      } else if (e.code === 'ENOTFOUND') {
+        console.log('Unable to connect to server. Check your internet connection');
+      } else {
+        console.log(e);
+      }
     }
 
     return null;
