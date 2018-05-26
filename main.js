@@ -38,14 +38,26 @@ function printEvents(events) {
 }
 
 
-function getCoinIdsFromSymbols(coinSymbols, coinList) {
+async function getCoinIdsFromSymbols(coinSymbols) {
+  if (coinSymbols == null || !Array.isArray(coinSymbols) || coinSymbols.length === 0) {
+    return [];
+  }
+
+  const coinList = await client.getCoins();
+
   return coinList
     .filter(coin => coinSymbols.includes(coin.symbol.toUpperCase()))
     .map(coin => coin.id);
 }
 
 
-function getCategoryIdsFromNames(categoryNames, categoryList) {
+async function getCategoryIdsFromNames(categoryNames) {
+  if (categoryNames == null || !Array.isArray(categoryNames) || categoryNames.length === 0) {
+    return [];
+  }
+
+  const categoryList = await client.getCategories();
+
   return categoryList
     .filter(category => categoryNames.includes(category.name.toUpperCase()))
     .map(category => category.id);
@@ -53,11 +65,10 @@ function getCategoryIdsFromNames(categoryNames, categoryList) {
 
 
 async function fetchData({ coinSymbols = [], categoryNames = [] }) {
-  const categoryList = await client.getCategories();
-  const categoryIds = getCategoryIdsFromNames(categoryNames, categoryList);
-
-  const coinList = await client.getCoins();
-  const coinIds = getCoinIdsFromSymbols(coinSymbols, coinList);
+  const [categoryIds, coinIds] = await Promise.all([
+    getCategoryIdsFromNames(categoryNames),
+    getCoinIdsFromSymbols(coinSymbols),
+  ]);
 
   const events = await client.getEvents({ coins: coinIds, categories: categoryIds });
 
