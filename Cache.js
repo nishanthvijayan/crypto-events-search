@@ -1,5 +1,7 @@
 const { readFileSync, writeFileSync } = require('fs');
 
+const MONTH_IN_MS = (7 * 24 * 60 * 60 * 1000);
+
 module.exports = class Cache {
   static cacheAccessToken({ accessToken, ttlSeconds }) {
     const validTill = Date.now() + (ttlSeconds * 1000);
@@ -28,7 +30,7 @@ module.exports = class Cache {
 
 
   static cacheCoinList(coins) {
-    const validTill = Date.now() + (7 * 24 * 60 * 60 * 1000);
+    const validTill = Date.now() + MONTH_IN_MS;
     writeFileSync('data/coins.json', JSON.stringify({ validTill, coins }));
   }
 
@@ -49,7 +51,7 @@ module.exports = class Cache {
 
 
   static cacheCategoryList(categories) {
-    const validTill = Date.now() + (7 * 24 * 60 * 60 * 1000);
+    const validTill = Date.now() + MONTH_IN_MS;
     writeFileSync('data/categories.json', JSON.stringify({ validTill, categories }));
   }
 

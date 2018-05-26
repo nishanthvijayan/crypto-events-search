@@ -30,7 +30,7 @@ function printEvents(events) {
       .map(({ symbol }) => symbol)
       .join(', ');
 
-    const type = event.categories.map(category => category.name).join(', ')
+    const type = event.categories.map(category => category.name).join(', ');
 
     table.push([coin, title, description, date, type, validity]);
   });
@@ -40,7 +40,7 @@ function printEvents(events) {
 
 
 async function getCoinList() {
-  let cachedCoinList = Cache.getCachedCoinList();
+  const cachedCoinList = Cache.getCachedCoinList();
   if (cachedCoinList == null) {
     const coinList = await client.getCoins();
 
@@ -65,7 +65,7 @@ function getCoinIdsFromSymbols(coinSymbols, coinList) {
 
 
 async function getCategoyList() {
-  let cachedCategoryList = Cache.getCachedCategoryList();
+  const cachedCategoryList = Cache.getCachedCategoryList();
   if (cachedCategoryList == null) {
     const categoryList = await client.getCategories();
 
@@ -74,7 +74,7 @@ async function getCategoyList() {
       process.exit();
     } else {
       Cache.cacheCategoryList(categoryList);
-      return categoryList
+      return categoryList;
     }
   }
 
