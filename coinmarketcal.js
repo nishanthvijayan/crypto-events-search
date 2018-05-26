@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const axios = require('axios');
-const { readFileSync, writeFileSync } = require('fs');
+const Cache = require('./Cache');
 
 module.exports = class CoinMarketCalendarClient {
   constructor({ clientId, clientSecret }) {
@@ -11,34 +11,8 @@ module.exports = class CoinMarketCalendarClient {
   }
 
 
-  static cacheAccessToken({ accessToken, ttlSeconds }) {
-    const validTill = Date.now() + (ttlSeconds * 1000);
-
-    writeFileSync(
-      'data/access_token.json',
-      JSON.stringify({ accessToken, validTill }),
-    );
-  }
-
-
-  static getCachedTokenIfValid() {
-    try {
-      const data = readFileSync('data/access_token.json');
-      const { accessToken, validTill } = JSON.parse(data.toString());
-
-      if (Date.now() < validTill) {
-        return accessToken;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-
-    return null;
-  }
-
-
   async authenticate() {
-    const cachedAccessToken = CoinMarketCalendarClient.getCachedTokenIfValid();
+    const cachedAccessToken = Cache.getCachedTokenIfValid();
     if (cachedAccessToken) {
       this.accessToken = cachedAccessToken;
       return;
@@ -58,7 +32,7 @@ module.exports = class CoinMarketCalendarClient {
       if (authResponse.data && authResponse.data.access_token) {
         this.accessToken = authResponse.data.access_token;
 
-        CoinMarketCalendarClient.cacheAccessToken({
+        Cache.cacheAccessToken({
           accessToken: this.accessToken,
           ttlSeconds: authResponse.data.expires_in,
         });
@@ -121,7 +95,9 @@ module.exports = class CoinMarketCalendarClient {
   }
 
 
-  async getEvents({ page = 1, max = 50, coins }) {
+  async getEvents({
+    page = 1, max = 150, coins, categories,
+  }) {
     const eventsUrl = 'https://api.coinmarketcal.com/v1/events';
 
     if (this.accessToken == null) {
@@ -131,7 +107,11 @@ module.exports = class CoinMarketCalendarClient {
     const params = { access_token: this.accessToken, page, max };
 
     if (coins) {
-      params.coins = coins;
+      params.coins = coins.join(',');
+    }
+
+    if (categories) {
+      params.categories = categories.join(',');
     }
 
     try {
