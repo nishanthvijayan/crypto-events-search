@@ -58,15 +58,15 @@ module.exports = class CoinMarketCalendarClient {
     }
 
     try {
-      const coinsResponse = await axios(coinsUrl, {
+      const coins = await axios(coinsUrl, {
         params: {
           access_token: this.accessToken,
         },
-      });
+      }).data;
 
-      if (coinsResponse.data) {
-        Cache.cacheCoinList(coinsResponse.data);
-        return coinsResponse.data;
+      if (coins && Array.isArray(coins) && coins.length > 0) {
+        Cache.cacheCoinList(coins);
+        return coins;
       }
     } catch (e) {
       // TODO: Catch auth faiure and unset this.access_token
@@ -91,15 +91,15 @@ module.exports = class CoinMarketCalendarClient {
     }
 
     try {
-      const categoriesResponse = await axios(categoriesUrl, {
+      const categories = await axios(categoriesUrl, {
         params: {
           access_token: this.accessToken,
         },
-      });
+      }).data;
 
-      if (categoriesResponse.data) {
-        Cache.cacheCategoryList(categoriesResponse.data);
-        return categoriesResponse.data;
+      if (categories && Array.isArray(categories) && categories.length > 0) {
+        Cache.cacheCategoryList(categories);
+        return categories;
       }
     } catch (e) {
       // TODO: Catch auth faiure and unset this.access_token
