@@ -4,7 +4,6 @@ const CoinMarketCalendarClient = require('./Coinmarketcal');
 const Table = require('tty-table')('automattic-cli-table');
 const program = require('commander');
 const { clientId, clientSecret } = require('./secrets.json').api;
-const Cache = require('./Cache');
 
 const client = new CoinMarketCalendarClient({ clientId, clientSecret });
 
@@ -39,46 +38,10 @@ function printEvents(events) {
 }
 
 
-async function getCoinList() {
-  const cachedCoinList = Cache.getCachedCoinList();
-  if (cachedCoinList == null) {
-    const coinList = await client.getCoins();
-
-    if (coinList == null) {
-      console.log('Something went wrong. Try again later. Contact the author if the problem persists');
-      process.exit();
-    } else {
-      Cache.cacheCoinList(coinList);
-      return coinList;
-    }
-  }
-
-  return cachedCoinList;
-}
-
-
 function getCoinIdsFromSymbols(coinSymbols, coinList) {
   return coinList
     .filter(coin => coinSymbols.includes(coin.symbol.toUpperCase()))
     .map(coin => coin.id);
-}
-
-
-async function getCategoyList() {
-  const cachedCategoryList = Cache.getCachedCategoryList();
-  if (cachedCategoryList == null) {
-    const categoryList = await client.getCategories();
-
-    if (categoryList == null) {
-      console.log('Something went wrong. Try again later. Contact the author if the problem persists');
-      process.exit();
-    } else {
-      Cache.cacheCategoryList(categoryList);
-      return categoryList;
-    }
-  }
-
-  return cachedCategoryList;
 }
 
 
@@ -90,15 +53,15 @@ function getCategoryIdsFromNames(categoryNames, categoryList) {
 
 
 async function fetchData({ coinSymbols = [], categoryNames = [] }) {
-  const categoryList = await getCategoyList();
+  const categoryList = await client.getCategories();
   const categoryIds = getCategoryIdsFromNames(categoryNames, categoryList);
 
-  const coinList = await getCoinList();
+  const coinList = await client.getCoins();
   const coinIds = getCoinIdsFromSymbols(coinSymbols, coinList);
 
   const events = await client.getEvents({ coins: coinIds, categories: categoryIds });
 
-  if (events && (Array.isArray(events) && events.length > 0)) {
+  if (events && Array.isArray(events) && events.length > 0) {
     printEvents(events);
   } else {
     console.log('No events found');
@@ -107,10 +70,12 @@ async function fetchData({ coinSymbols = [], categoryNames = [] }) {
 
 
 async function printTypes() {
-  const types = await getCategoyList();
+  const types = await client.getCategories();
 
-  console.log('Valid types are: ');
-  console.log(types.map(type => type.name).join(', '));
+  if (types && Array.isArray(types) && types.length > 0) {
+    console.log('Valid types are: ');
+    console.log(types.map(type => type.name).join(', '));
+  }
 }
 
 

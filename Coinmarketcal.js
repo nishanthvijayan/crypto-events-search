@@ -44,6 +44,13 @@ module.exports = class CoinMarketCalendarClient {
 
 
   async getCoins() {
+    // If cache has fresh,non-empty coin list, return that.
+    const cachedCoinList = Cache.getCachedCoinList();
+    if (cachedCoinList && Array.isArray(cachedCoinList) && cachedCoinList.length > 0) {
+      return cachedCoinList;
+    }
+
+
     const coinsUrl = 'https://api.coinmarketcal.com/v1/coins';
 
     if (this.accessToken == null) {
@@ -58,6 +65,7 @@ module.exports = class CoinMarketCalendarClient {
       });
 
       if (coinsResponse.data) {
+        Cache.cacheCoinList(coinsResponse.data);
         return coinsResponse.data;
       }
     } catch (e) {
@@ -70,6 +78,12 @@ module.exports = class CoinMarketCalendarClient {
 
 
   async getCategories() {
+    // If cache has fresh,non-empty category list, return that.
+    const cachedCategoryList = Cache.getCachedCategoryList();
+    if (cachedCategoryList && Array.isArray(cachedCategoryList) && cachedCategoryList.length > 0) {
+      return cachedCategoryList;
+    }
+
     const categoriesUrl = 'https://api.coinmarketcal.com/v1/categories';
 
     if (this.accessToken == null) {
@@ -84,6 +98,7 @@ module.exports = class CoinMarketCalendarClient {
       });
 
       if (categoriesResponse.data) {
+        Cache.cacheCategoryList(categoriesResponse.data);
         return categoriesResponse.data;
       }
     } catch (e) {
