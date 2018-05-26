@@ -7,7 +7,7 @@ module.exports = class Cache {
     const validTill = Date.now() + (ttlSeconds * 1000);
 
     writeFileSync(
-      'data/access_token.json',
+      __dirname + '/data/access_token.json',
       JSON.stringify({ accessToken, validTill }),
     );
   }
@@ -15,7 +15,7 @@ module.exports = class Cache {
 
   static getCachedTokenIfValid() {
     try {
-      const data = readFileSync('data/access_token.json');
+      const data = readFileSync(__dirname + '/data/access_token.json');
       const { accessToken, validTill } = JSON.parse(data.toString());
 
       if (Date.now() < validTill) {
@@ -31,12 +31,12 @@ module.exports = class Cache {
 
   static cacheCoinList(coins) {
     const validTill = Date.now() + MONTH_IN_MS;
-    writeFileSync('data/coins.json', JSON.stringify({ validTill, coins }));
+    writeFileSync(__dirname + '/data/coins.json', JSON.stringify({ validTill, coins }));
   }
 
   static getCachedCoinList() {
     try {
-      const data = readFileSync('data/coins.json');
+      const data = readFileSync(__dirname + '/data/coins.json');
       const { validTill, coins } = JSON.parse(data.toString());
 
       if (Date.now() < validTill) {
@@ -52,12 +52,12 @@ module.exports = class Cache {
 
   static cacheCategoryList(categories) {
     const validTill = Date.now() + MONTH_IN_MS;
-    writeFileSync('data/categories.json', JSON.stringify({ validTill, categories }));
+    writeFileSync(__dirname + '/data/categories.json', JSON.stringify({ validTill, categories }));
   }
 
   static getCachedCategoryList() {
     try {
-      const data = readFileSync('data/categories.json');
+      const data = readFileSync(__dirname + '/data/categories.json');
       const { validTill, categories } = JSON.parse(data.toString());
 
       if (Date.now() < validTill) {
