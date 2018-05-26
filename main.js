@@ -64,7 +64,7 @@ async function getCategoryIdsFromNames(categoryNames) {
 }
 
 
-async function fetchData({ coinSymbols = [], categoryNames = [] }) {
+async function fetchEvents({ coinSymbols = [], categoryNames = [] }) {
   const [categoryIds, coinIds] = await Promise.all([
     getCategoryIdsFromNames(categoryNames),
     getCoinIdsFromSymbols(coinSymbols),
@@ -112,7 +112,7 @@ function main() {
         .map(category => category.trim().toUpperCase());
     }
 
-    fetchData(params);
+    fetchEvents(params);
   } else {
     console.log('No coins or types specified\n');
     console.log('Use -c or --coins to specify coins Eg: --coins btc,omg,xmr');

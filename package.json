@@ -16,6 +16,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "commander": "^2.15.1",
+    "configstore": "^3.1.2",
     "tty-table": "^2.6.3"
   },
   "bin": {

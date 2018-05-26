@@ -3,16 +3,19 @@
 const axios = require('axios');
 const Cache = require('./Cache');
 
+const WEEK_IN_MS = (7 * 24 * 60 * 60 * 1000);
+
 module.exports = class CoinMarketCalendarClient {
   constructor({ clientId, clientSecret }) {
     this.clientId = clientId;
     this.clientSecret = clientSecret;
+    this.cache = new Cache();
     this.accessToken = null;
   }
 
 
   async authenticate() {
-    const cachedAccessToken = Cache.getCachedTokenIfValid();
+    const cachedAccessToken = this.cache.get('access_token');
     if (cachedAccessToken) {
       this.accessToken = cachedAccessToken;
       return;
@@ -31,11 +34,7 @@ module.exports = class CoinMarketCalendarClient {
 
       if (authResponse.data && authResponse.data.access_token) {
         this.accessToken = authResponse.data.access_token;
-
-        Cache.cacheAccessToken({
-          accessToken: this.accessToken,
-          ttlSeconds: authResponse.data.expires_in,
-        });
+        this.cache.set('access_token', this.accessToken, authResponse.data.expires_in * 1000);
       }
     } catch (e) {
       console.log(e);
@@ -45,7 +44,7 @@ module.exports = class CoinMarketCalendarClient {
 
   async getCoins() {
     // If cache has fresh,non-empty coin list, return that.
-    const cachedCoinList = Cache.getCachedCoinList();
+    const cachedCoinList = this.cache.get('coins');
     if (cachedCoinList && Array.isArray(cachedCoinList) && cachedCoinList.length > 0) {
       return cachedCoinList;
     }
@@ -65,7 +64,7 @@ module.exports = class CoinMarketCalendarClient {
       }).data;
 
       if (coins && Array.isArray(coins) && coins.length > 0) {
-        Cache.cacheCoinList(coins);
+        this.cache.set('coins', coins, WEEK_IN_MS);
         return coins;
       }
     } catch (e) {
@@ -79,7 +78,7 @@ module.exports = class CoinMarketCalendarClient {
 
   async getCategories() {
     // If cache has fresh,non-empty category list, return that.
-    const cachedCategoryList = Cache.getCachedCategoryList();
+    const cachedCategoryList = this.cache.get('categories');
     if (cachedCategoryList && Array.isArray(cachedCategoryList) && cachedCategoryList.length > 0) {
       return cachedCategoryList;
     }
@@ -98,7 +97,7 @@ module.exports = class CoinMarketCalendarClient {
       }).data;
 
       if (categories && Array.isArray(categories) && categories.length > 0) {
-        Cache.cacheCategoryList(categories);
+        this.cache.set('categories', categories, WEEK_IN_MS);
         return categories;
       }
     } catch (e) {
@@ -110,9 +109,7 @@ module.exports = class CoinMarketCalendarClient {
   }
 
 
-  async getEvents({
-    page = 1, max = 150, coins, categories,
-  }) {
+  async getEvents({ page = 1, max = 150, coins, categories }) {
     const eventsUrl = 'https://api.coinmarketcal.com/v1/events';
 
     if (this.accessToken == null) {
