@@ -116,7 +116,7 @@ function main() {
   } else {
     console.log('No coins or types specified\n');
     console.log('Use -c or --coins to specify coins Eg: --coins btc,omg,xmr');
-    console.log('Use -t or --t to filter event by types Eg: --types roadmap,airdrop\n');
+    console.log('Use -t or --types to filter event by types Eg: --types roadmap,airdrop\n');
     printTypes();
   }
 }
