@@ -1,5 +1,5 @@
 {
-  "name": "search-crypto-events",
+  "name": "crypto-events-search",
   "version": "1.0.0",
   "description": "A command line application to search for upcoming cryptocurrency events",
   "main": "main.js",
