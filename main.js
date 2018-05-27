@@ -137,13 +137,13 @@ function main() {
   }
 
 
-  const { clientId, clientSecret } = Store.get('credentials');
-  if (clientId == null || clientSecret == null) {
+  const credentails = Store.get('credentials');
+  if (credentails == null) {
     displaySetCredentailsMessage();
     process.exit();
   }
 
-
+  const { clientId, clientSecret } = credentails;
   const coinmarketcalApi = new CoinMarketCalendarClient({ clientId, clientSecret });
 
   if (program.coins || program.types) {
@@ -161,7 +161,7 @@ function main() {
   } else if (program.list) {
     displayAvailableTypes(coinmarketcalApi);
   } else {
-    console.log("No input params detected\n");
+    console.log('No input params detected\n');
     displayExampleUsage();
     displayAvailableTypes(coinmarketcalApi);
   }
