@@ -63,11 +63,13 @@ module.exports = class CoinMarketCalendarClient {
     }
 
     try {
-      const coins = await axios(coinsUrl, {
+      const response = await axios(coinsUrl, {
         params: {
           access_token: this.accessToken,
         },
-      }).data;
+      });
+
+      const coins = response.data;
 
       if (coins && Array.isArray(coins) && coins.length > 0) {
         this.cache.set('coins', coins, WEEK_IN_MS);
@@ -103,11 +105,13 @@ module.exports = class CoinMarketCalendarClient {
     }
 
     try {
-      const categories = await axios(categoriesUrl, {
+      const response = await axios(categoriesUrl, {
         params: {
           access_token: this.accessToken,
         },
-      }).data;
+      });
+
+      const categories = response.data;
 
       if (categories && Array.isArray(categories) && categories.length > 0) {
         this.cache.set('categories', categories, WEEK_IN_MS);
