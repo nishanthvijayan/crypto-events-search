@@ -1,7 +1,7 @@
 {
-  "name": "coin_news",
+  "name": "search-crypto-events",
   "version": "1.0.0",
-  "description": "A simple command line application to search for upcoming cryptocurrency events",
+  "description": "A command line application to search for upcoming cryptocurrency events",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -20,7 +20,7 @@
     "tty-table": "^2.6.3"
   },
   "bin": {
-    "coin_news": "./main.js"
+    "search-crypto-events": "./main.js"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
