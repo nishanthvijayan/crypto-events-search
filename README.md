@@ -14,16 +14,24 @@ crypto-events-search --config YOUR_CLIENT_ID:YOUR_CLIENT_SECRET
 Note: Coin symbols and event types case-insensitive.  
   
 ### Search events of a specific coin
-``` crypto-events-search -c omg```  
+```
+crypto-events-search -c OMG
+```  
   
   
 ### Search events of multiple coins
-``` crypto-events-search -c eth,xmr,mana```
+```
+crypto-events-search -c ETH,XMR,MANA
+```
   
   
 ### List different types of events
 The types returned in this command can be used to filter what type of events you're searching for.  
-``` crypto-events-search -l```
+```
+crypto-events-search -l
+```
 
 ### Search events of a particular type
-``` crypto-events-search -c etc,xmr,mana -t burn,roadmap```
+```
+crypto-events-search -c etc,xmr,mana -t burn,roadmap
+```
