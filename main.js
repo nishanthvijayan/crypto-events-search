@@ -3,9 +3,9 @@
 const CoinMarketCalendarClient = require('./Coinmarketcal');
 const Table = require('tty-table')('automattic-cli-table');
 const program = require('commander');
-const { clientId, clientSecret } = require('./secrets.json').api;
+const Cache = require('./Cache');
+const pkgName = require('./package.json').name;
 
-const client = new CoinMarketCalendarClient({ clientId, clientSecret });
 
 function printEvents(events) {
   const table = new Table({
@@ -38,12 +38,12 @@ function printEvents(events) {
 }
 
 
-async function getCoinIdsFromSymbols(coinSymbols) {
+async function getCoinIdsFromSymbols(coinmarketcalApi, coinSymbols) {
   if (coinSymbols == null || !Array.isArray(coinSymbols) || coinSymbols.length === 0) {
     return [];
   }
 
-  const coinList = await client.getCoins();
+  const coinList = await coinmarketcalApi.getCoins();
 
   return coinList
     .filter(coin => coinSymbols.includes(coin.symbol.toUpperCase()))
@@ -51,12 +51,12 @@ async function getCoinIdsFromSymbols(coinSymbols) {
 }
 
 
-async function getCategoryIdsFromNames(categoryNames) {
+async function getCategoryIdsFromNames(coinmarketcalApi, categoryNames) {
   if (categoryNames == null || !Array.isArray(categoryNames) || categoryNames.length === 0) {
     return [];
   }
 
-  const categoryList = await client.getCategories();
+  const categoryList = await coinmarketcalApi.getCategories();
 
   return categoryList
     .filter(category => categoryNames.includes(category.name.toUpperCase()))
@@ -64,13 +64,13 @@ async function getCategoryIdsFromNames(categoryNames) {
 }
 
 
-async function fetchEvents({ coinSymbols = [], categoryNames = [] }) {
+async function fetchEvents(coinmarketcalApi, { coinSymbols = [], categoryNames = [] }) {
   const [categoryIds, coinIds] = await Promise.all([
-    getCategoryIdsFromNames(categoryNames),
-    getCoinIdsFromSymbols(coinSymbols),
+    getCategoryIdsFromNames(coinmarketcalApi, categoryNames),
+    getCoinIdsFromSymbols(coinmarketcalApi, coinSymbols),
   ]);
 
-  const events = await client.getEvents({ coins: coinIds, categories: categoryIds });
+  const events = await coinmarketcalApi.getEvents({ coins: coinIds, categories: categoryIds });
 
   if (events && Array.isArray(events) && events.length > 0) {
     printEvents(events);
@@ -80,8 +80,8 @@ async function fetchEvents({ coinSymbols = [], categoryNames = [] }) {
 }
 
 
-async function printTypes() {
-  const types = await client.getCategories();
+async function displayAvailableTypes(coinmarketcalApi) {
+  const types = await coinmarketcalApi.getCategories();
 
   if (types && Array.isArray(types) && types.length > 0) {
     console.log('Valid types are: ');
@@ -90,34 +90,80 @@ async function printTypes() {
 }
 
 
+function standardize(values) {
+  return values
+    .split(',')
+    .map(symbol => symbol.trim().toUpperCase());
+}
+
+
+function displaySetCredentailsMessage() {
+  console.log('No API credentails found');
+  console.log('Register at https://api.coinmarketcal.com/developer/register to get you API client Id and secret');
+  console.log('Use --config CLIENTID:CLIENTSECRET to set API credentials');
+  console.log('Example: $ crypto_news --config dummyclientid123:fakeclientsecret456');
+}
+
+
+function displayExampleUsage() {
+  console.log('  Examples:');
+  console.log('');
+  console.log(`    $ ${pkgName} --config dummyclientid123:fakeclientsecret456`);
+  console.log(`    $ ${pkgName} -c omg,etc`);
+  console.log(`    $ ${pkgName} --coins omg,etc`);
+  console.log(`    $ ${pkgName} -t roadmap,burn`);
+  console.log(`    $ ${pkgName} --types roadmap,burn`);
+  console.log(`    $ ${pkgName} -c omg,etc -t roadmap,burn`);
+  console.log('');
+}
+
+
 function main() {
   program
-    .option('-c, --coins [symbols]', 'Comma separated list of coin symbols (Eg: btc,eth,req)')
-    .option('-t, --types [types]', 'Comma separated list of event types to filter by (Eg: Roadmap,Airdrop)')
+    .option('-c, --coins <symbols>', 'Comma separated list of coin symbols (Eg: btc,eth,req)', standardize)
+    .option('-t, --types <types>', 'Comma separated list of event types to filter by (Eg: Roadmap,Airdrop)', standardize)
+    .option('-l, --list', 'List all categories')
+    .option('--config <cliendId:clientSecret>', 'Set CoinMarketCal API credentials')
     .parse(process.argv);
 
+
+  const Store = new Cache();
+
+  if (program.config) {
+    const [clientId, clientSecret] = program.config.split(':');
+    Store.set('credentials', { clientId, clientSecret });
+    console.log('API credentails set.');
+    process.exit();
+  }
+
+
+  const { clientId, clientSecret } = Store.get('credentials');
+  if (clientId == null || clientSecret == null) {
+    displaySetCredentailsMessage();
+    process.exit();
+  }
+
+
+  const coinmarketcalApi = new CoinMarketCalendarClient({ clientId, clientSecret });
 
   if (program.coins || program.types) {
     const params = {};
 
     if (program.coins) {
-      params.coinSymbols = program.coins
-        .split(',')
-        .map(symbol => symbol.trim().toUpperCase());
+      params.coinSymbols = program.coins;
     }
 
     if (program.types) {
-      params.categoryNames = program.types
-        .split(',')
-        .map(category => category.trim().toUpperCase());
+      params.categoryNames = program.types;
     }
 
-    fetchEvents(params);
+    fetchEvents(coinmarketcalApi, params);
+  } else if (program.list) {
+    displayAvailableTypes(coinmarketcalApi);
   } else {
-    console.log('No coins or types specified\n');
-    console.log('Use -c or --coins to specify coins Eg: --coins btc,omg,xmr');
-    console.log('Use -t or --types to filter event by types Eg: --types roadmap,airdrop\n');
-    printTypes();
+    console.log("No input params detected\n");
+    displayExampleUsage();
+    displayAvailableTypes(coinmarketcalApi);
   }
 }
 
