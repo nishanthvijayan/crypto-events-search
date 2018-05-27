@@ -1,6 +1,7 @@
 const Configstore = require('configstore');
 const pkg = require('./package.json');
 
+const TEN_YEARS_IN_MS = 10 * 365 * 24 * 60 * 60 * 1000;
 
 module.exports = class Cache {
   constructor() {
@@ -19,7 +20,7 @@ module.exports = class Cache {
     return null;
   }
 
-  set(key, data, ttlInMs) {
+  set(key, data, ttlInMs = TEN_YEARS_IN_MS) {
     const validTill = Date.now() + ttlInMs;
     return this.store.set(key, { validTill, data });
   }
