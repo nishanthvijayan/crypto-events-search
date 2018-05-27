@@ -20,7 +20,7 @@
     "tty-table": "^2.6.3"
   },
   "bin": {
-    "search-crypto-events": "./main.js"
+    "crypto-events-search": "./main.js"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
