@@ -1,5 +1,6 @@
 # crypto-events-search
 
+ ![crypto-events-search](https://i.imgur.com/OCkPZYu.png)
 
 ## Installation
   
