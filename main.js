@@ -5,7 +5,7 @@ const Table = require('tty-table')('automattic-cli-table');
 const program = require('commander');
 const Cache = require('./Cache');
 const pkgName = require('./package.json').name;
-
+const { isNonEmptyArray } = require('./utils');
 
 function printEvents(events) {
   const table = new Table({
@@ -39,7 +39,7 @@ function printEvents(events) {
 
 
 async function getCoinIdsFromSymbols(coinmarketcalApi, coinSymbols) {
-  if (coinSymbols == null || !Array.isArray(coinSymbols) || coinSymbols.length === 0) {
+  if (!isNonEmptyArray(coinSymbols)) {
     return [];
   }
 
@@ -52,7 +52,7 @@ async function getCoinIdsFromSymbols(coinmarketcalApi, coinSymbols) {
 
 
 async function getCategoryIdsFromNames(coinmarketcalApi, categoryNames) {
-  if (categoryNames == null || !Array.isArray(categoryNames) || categoryNames.length === 0) {
+  if (!isNonEmptyArray(categoryNames)) {
     return [];
   }
 
@@ -99,16 +99,16 @@ function standardize(values) {
 
 function displaySetCredentailsMessage() {
   console.log('No API credentails found');
-  console.log('Register at https://api.coinmarketcal.com/developer/register to get you API client Id and secret');
-  console.log('Use --config CLIENTID:CLIENTSECRET to set API credentials');
-  console.log('Example: $ crypto_news --config dummyclientid123:fakeclientsecret456');
+  console.log('Register at https://coinmarketcal.com/en/developer/register to get you API key');
+  console.log('Use --config YOUR_API_KEY to set API KEY');
+  console.log('Example: $ crypto_news --config fakeAPIKEY1233546');
 }
 
 
 function displayExampleUsage() {
   console.log('  Examples:');
   console.log('');
-  console.log(`    $ ${pkgName} --config dummyclientid123:fakeclientsecret456`);
+  console.log(`    $ ${pkgName} --config your_api_key`);
   console.log(`    $ ${pkgName} -c omg,etc`);
   console.log(`    $ ${pkgName} --coins omg,etc`);
   console.log(`    $ ${pkgName} -t roadmap,burn`);
@@ -123,28 +123,27 @@ function main() {
     .option('-c, --coins <symbols>', 'Comma separated list of coin symbols (Eg: btc,eth,req)', standardize)
     .option('-t, --types <types>', 'Comma separated list of event types to filter by (Eg: Roadmap,Airdrop)', standardize)
     .option('-l, --list', 'List all categories')
-    .option('--config <cliendId:clientSecret>', 'Set CoinMarketCal API credentials')
+    .option('--config <API_KEY>', 'Set CoinMarketCal API KEY')
     .parse(process.argv);
 
 
   const Store = new Cache();
 
   if (program.config) {
-    const [clientId, clientSecret] = program.config.split(':');
-    Store.set('credentials', { clientId, clientSecret });
+    const apiKey = program.config;
+    Store.set('API_KEY', apiKey);
     console.log('API credentails set.');
     process.exit();
   }
 
 
-  const credentails = Store.get('credentials');
-  if (credentails == null) {
+  const apiKey = Store.get('API_KEY');
+  if (apiKey == null) {
     displaySetCredentailsMessage();
     process.exit();
   }
 
-  const { clientId, clientSecret } = credentails;
-  const coinmarketcalApi = new CoinMarketCalendarClient({ clientId, clientSecret });
+  const coinmarketcalApi = new CoinMarketCalendarClient({ apiKey });
 
   if (program.coins || program.types) {
     const params = {};
