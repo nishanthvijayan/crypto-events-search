@@ -4,10 +4,10 @@
 
 ## Installation
   
-[Register a developer account](https://api.coinmarketcal.com/developer/register) at CoinMarketCal to get you API client Id & secret.  
+[Register a developer account](https://coinmarketcal.com/en/developer/register) at CoinMarketCal to get your API Key.
 ```
 npm install -g crypto-events-search
-crypto-events-search --config YOUR_CLIENT_ID:YOUR_CLIENT_SECRET
+crypto-events-search --config YOUR_API_KEY
 ```
   
 ## Usage
