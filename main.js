@@ -72,7 +72,7 @@ async function fetchEvents(coinmarketcalApi, { coinSymbols = [], categoryNames =
 
   const events = await coinmarketcalApi.getEvents({ coins: coinIds, categories: categoryIds });
 
-  if (events && Array.isArray(events) && events.length > 0) {
+  if (isNonEmptyArray(events)) {
     printEvents(events);
   } else {
     console.log('No events found');
@@ -83,7 +83,7 @@ async function fetchEvents(coinmarketcalApi, { coinSymbols = [], categoryNames =
 async function displayAvailableTypes(coinmarketcalApi) {
   const types = await coinmarketcalApi.getCategories();
 
-  if (types && Array.isArray(types) && types.length > 0) {
+  if (isNonEmptyArray(types)) {
     console.log('Valid types are: ');
     console.log(types.map(type => type.name).join(', '));
   }
