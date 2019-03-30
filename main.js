@@ -9,11 +9,15 @@ const { isNonEmptyArray } = require('./utils');
 
 function printEvents(events) {
   const table = new Table({
-    head: ['Coin(s)', 'Title', 'Desc', 'Date', 'Type', 'Validity (%)'],
+    head: ['Coin(s)', 'Title', 'Date', 'Type'],
   });
 
   events.forEach((event) => {
-    const { title, description } = event;
+    const {
+      title: {
+        en: englishTile,
+      },
+    } = event;
 
     const date = new Date(event.date_event).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -22,16 +26,14 @@ function printEvents(events) {
       day: 'numeric',
     });
 
-    const validity = event.percentage;
-
     const coin = event.coins
       .filter(({ id }) => id !== 'custom_coin')
-      .map(({ symbol }) => symbol)
+      .map(({ fullname }) => fullname)
       .join(', ');
 
     const type = event.categories.map(category => category.name).join(', ');
 
-    table.push([coin, title, description, date, type, validity]);
+    table.push([coin, englishTile, date, type]);
   });
 
   console.log(table.toString());
